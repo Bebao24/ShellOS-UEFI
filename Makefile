@@ -37,6 +37,7 @@ always:
 
 clean:
 	rm -rf $(BUILD_DIR)/*
+	$(MAKE) -C kernel clean
 
 run:
 	qemu-system-x86_64 -drive file=$(BUILD_DIR)/image.iso \

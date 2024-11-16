@@ -1,17 +1,17 @@
-CC = gcc
-LD = gcc
+CC = x86_64-elf-gcc
+LD = x86_64-elf-gcc
 
 LDS = kernel.ld
 
-CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone
-LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc
+CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -I src -I src/graphics
+LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc -fno-exceptions
 
 SRC_DIR = src
 OBJECT_DIR = objs
 BUILD_DIR = bin
 
-C_SOURCES := $(shell find src -name "*.c" -type f)
-C_OBJECTS := $(patsubst $(SRC_DIR)/%.c, $(OBJECT_DIR)/%.o, $(C_SOURCES))
+C_SOURCES := $(shell find src -name "*.cpp" -type f)
+C_OBJECTS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJECT_DIR)/%.o, $(C_SOURCES))
 
 C_HEADERS := $(shell find src -name "*.h" -type f)
 
@@ -25,7 +25,7 @@ $(BUILD_DIR)/kernel.bin: $(C_OBJECTS)
 	@ mkdir -p $(BUILD_DIR)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-$(OBJECT_DIR)/%.o: $(SRC_DIR)/%.c $(C_HEADERS)
+$(OBJECT_DIR)/%.o: $(SRC_DIR)/%.cpp $(C_HEADERS)
 	@ echo "Compiling" $^
 	@ mkdir -p $(dir $@)
 	@ $(CC) $(CFLAGS) -c -o $@ $<

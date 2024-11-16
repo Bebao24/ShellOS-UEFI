@@ -2,6 +2,7 @@ BUILD_DIR = bin
 GNU_EFI = gnu-efi
 KERNEL = kernel
 OVMFDIR = OVMFbin
+FONT = fonts
 
 .PHONY: all image kernel bootloader clean run
 
@@ -19,6 +20,7 @@ $(BUILD_DIR)/image.iso: kernel bootloader
 	@ mcopy -i $@ $(GNU_EFI)/x86_64/bootloader/main.efi ::/EFI/BOOT
 	@ mcopy -i $@ startup.nsh ::
 	@ mcopy -i $@ $(KERNEL)/bin/kernel.bin ::
+	@ mcopy -i $@ $(FONT)/default.psf ::
 	@ echo "Created " $@
 
 kernel: $(KERNEL)/bin/kernel.bin

@@ -7,9 +7,8 @@
 #include <framebuffer.h>
 #include <font.h>
 #include <BasicRenderer.h>
-#include <memory.h>
-#include <bitmap.h>
 #include <cstring>
+#include <PageFrameAllocator.h>
 
 struct BootInfo
 {
@@ -19,6 +18,9 @@ struct BootInfo
     uint64_t mMapSize; // UINTN is uint64_t
     uint64_t mDescriptorSize;
 };
+
+extern uint64_t _KernelStart;
+extern uint64_t _KernelEnd;
 
 extern "C" void kmain(BootInfo* bootInfo)
 {
@@ -30,21 +32,16 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     uint64_t mMapEntries = bootInfo->mMapSize / bootInfo->mDescriptorSize;
 
-    uint8_t buffer[20];
-    memset(buffer, 0, sizeof(buffer));
+    PageFrameAllocator allocator;
+    allocator.ReadEFIMemoryMap(bootInfo->mMap, bootInfo->mMapSize, bootInfo->mDescriptorSize);
 
-    Bitmap testBitmap(buffer, sizeof(buffer)); 
-    testBitmap.Set(0, true);
-    testBitmap.Set(2, true);
-    testBitmap.Set(4, true);
-    testBitmap.Set(6, true);
-    testBitmap.Set(8, true);
+    uint64_t kernelSize = (uint64_t)&_KernelEnd - (uint64_t)&_KernelStart;
+    uint64_t kernelPages = (uint64_t)kernelSize / 4096 + 1;
 
-    for (int i = 0; i < 20; i++)
-    {
-        renderer.printf(testBitmap[i] ? "true" : "false");
-        renderer.putc('\n');
-    }
+    allocator.LockPages(&_KernelStart, kernelPages);
+
+    void* address = allocator.RequestPage();
+    renderer.printf("Address: 0x%x", address);
 
     while (1)
     {

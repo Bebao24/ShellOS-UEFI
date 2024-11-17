@@ -1,11 +1,5 @@
 #include "bitmap.h"
 
-Bitmap::Bitmap(uint8_t* bitmapBuffer, size_t bufferSize)
-    :bitmapBuffer(bitmapBuffer), bufferSize(bufferSize)
-{
-
-}
-
 bool Bitmap::operator[](uint64_t index)
 {
     return this->Get(index);

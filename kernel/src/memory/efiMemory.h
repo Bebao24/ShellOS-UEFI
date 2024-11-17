@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 #include <stdint.h>
 
 struct EFI_MEMORY_DESCRIPTOR

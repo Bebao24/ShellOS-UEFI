@@ -30,3 +30,5 @@ private:
     void InitializeBitmap(void* bitmapBuffer, size_t bufferSize);
 };
 
+extern PageFrameAllocator GlobalAllocator;
+

@@ -9,6 +9,8 @@ static uint64_t usedMemory;
 static uint64_t reservedMemory;
 static bool initialize = false;
 
+PageFrameAllocator GlobalAllocator;
+
 void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* mMap, uint64_t mMapSize, uint64_t mDescriptorSize)
 {
     if (initialize) return;

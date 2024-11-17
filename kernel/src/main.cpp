@@ -8,6 +8,8 @@
 #include <font.h>
 #include <BasicRenderer.h>
 #include <memory.h>
+#include <bitmap.h>
+#include <cstring>
 
 struct BootInfo
 {
@@ -28,8 +30,21 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     uint64_t mMapEntries = bootInfo->mMapSize / bootInfo->mDescriptorSize;
 
-    uint64_t totalMemory = getMemorySize(bootInfo->mMap, mMapEntries, bootInfo->mDescriptorSize) / 1024 / 1024;
-    renderer.printf("Total memory size: %llu MB\n", totalMemory);
+    uint8_t buffer[20];
+    memset(buffer, 0, sizeof(buffer));
+
+    Bitmap testBitmap(buffer, sizeof(buffer)); 
+    testBitmap.Set(0, true);
+    testBitmap.Set(2, true);
+    testBitmap.Set(4, true);
+    testBitmap.Set(6, true);
+    testBitmap.Set(8, true);
+
+    for (int i = 0; i < 20; i++)
+    {
+        renderer.printf(testBitmap[i] ? "true" : "false");
+        renderer.putc('\n');
+    }
 
     while (1)
     {

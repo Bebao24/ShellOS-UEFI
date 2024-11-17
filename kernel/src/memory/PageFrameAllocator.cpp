@@ -59,14 +59,15 @@ void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* mMap, uint64_t 
     LockPages(this->pageBitmap.bitmapBuffer, this->pageBitmap.bufferSize / 4096 + 1);
 }
 
+uint64_t pageBitmapIndex = 0;
 void* PageFrameAllocator::RequestPage()
 {
-    for (uint64_t i = 0; i < this->pageBitmap.bufferSize * 8; i++)
+    for (; pageBitmapIndex < this->pageBitmap.bufferSize * 8; pageBitmapIndex++)
     {
-        if (this->pageBitmap[i] == true) continue;
+        if (this->pageBitmap[pageBitmapIndex] == true) continue;
         
-        LockPage((void*)(i * 4096));
-        return (void*)(i * 4096);
+        LockPage((void*)(pageBitmapIndex * 4096));
+        return (void*)(pageBitmapIndex * 4096);
     }
 
     return NULL; // We will be able to swap pages in the future
@@ -89,6 +90,11 @@ void PageFrameAllocator::FreePage(void* address)
     this->pageBitmap.Set(index, false);
     freeMemory += 4096;
     usedMemory -= 4096;
+
+    if (pageBitmapIndex > index)
+    {
+        pageBitmapIndex = index;
+    }
 }
 
 void PageFrameAllocator::LockPage(void* address)
@@ -119,6 +125,11 @@ void PageFrameAllocator::UnreservedPage(void* address)
     this->pageBitmap.Set(index, false);
     freeMemory += 4096;
     reservedMemory -= 4096;
+
+    if (pageBitmapIndex > index)
+    {
+        pageBitmapIndex = index;
+    }
 }
 
 void PageFrameAllocator::FreePages(void* address, uint64_t pagesCount)

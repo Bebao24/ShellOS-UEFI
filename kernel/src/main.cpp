@@ -29,9 +29,6 @@ extern "C" void kmain(BootInfo* bootInfo)
     BasicRenderer renderer(bootInfo->framebuffer, bootInfo->font);
     renderer.clearScreen(BACKGROUND_COLOR);
 
-    renderer.printf("Hello World from printf!\n");
-    renderer.printf("Test: 0x%x\n", 0x123);
-
     uint64_t mMapEntries = bootInfo->mMapSize / bootInfo->mDescriptorSize;
 
     GlobalAllocator = PageFrameAllocator();
@@ -64,6 +61,8 @@ extern "C" void kmain(BootInfo* bootInfo)
     asm volatile("mov %0, %%cr3" : : "r"(PML4)); // Pass the PML4 to the CPU
 
     renderer.printf("Paging initialize!\n");
+    
+    renderer.printf("Hello World!\n");
 
     while (1)
     {

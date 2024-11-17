@@ -2,6 +2,11 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+BasicRenderer* GlobalRenderer;
+
+char cursorBuffer[2][15];
+Vector2 previousPos;
+
 BasicRenderer::BasicRenderer(GOP_Framebuffer_t* framebuffer, PSF1_FONT* font)
     :fb(framebuffer), font(font)
 {
@@ -28,6 +33,9 @@ void BasicRenderer::drawRect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uin
 void BasicRenderer::clearScreen(uint32_t color)
 {
     // Won't use putPixel() because of performace issue
+ 
+    this->cursorPos = { 0, 0 };
+ 
     for (uint32_t y = 0; y < fb->height; y++)
     {
         uint64_t pixelPtrBase = (uint64_t)fb->BaseAddress + ((fb->PixelsPerScanLine * 4) * y);
@@ -91,6 +99,11 @@ void BasicRenderer::putc(char c)
         // Just clear the screen for now
         clearScreen(BACKGROUND_COLOR);
     }
+}
+
+void BasicRenderer::setColor(uint32_t color)
+{
+    this->textColor = color;
 }
 
 void BasicRenderer::puts(const char* string)

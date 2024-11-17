@@ -35,6 +35,13 @@ $(BUILD_DIR)/kernel.bin: $(C_OBJECTS) $(ASM_OBJECTS)
 	@ mkdir -p $(BUILD_DIR)
 	$(LD) $(LDFLAGS) -o $@ $^ -lgcc
 
+$(OBJECT_DIR)/arch/x86_64/cpu/interrupts.o: $(SRC_DIR)/arch/x86_64/cpu/interrupts.cpp $(SRC_DIR)/arch/x86_64/cpu/interrupts.h
+	@ echo "Compiling " $<
+	@ mkdir -p $(dir $@)
+	@ $(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding -c $< -o $@ -I src -I src/graphics -I src/memory \
+	 -I src/libc++ -I src/arch/x86_64 \
+	-I src/arch/x86_64/cpu
+
 $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.cpp $(C_HEADERS)
 	@ echo "Compiling" $<
 	@ mkdir -p $(dir $@)

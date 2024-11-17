@@ -13,6 +13,9 @@
 #include <memory.h>
 #include <gdt.h>
 
+#include <idt.h>
+#include <interrupts.h>
+
 struct BootInfo
 {
     GOP_Framebuffer_t* framebuffer;
@@ -25,10 +28,13 @@ struct BootInfo
 extern uint64_t _KernelStart;
 extern uint64_t _KernelEnd;
 
+BasicRenderer renderer(NULL, NULL);
+
 extern "C" void kmain(BootInfo* bootInfo)
 {
-    BasicRenderer renderer(bootInfo->framebuffer, bootInfo->font);
-    renderer.clearScreen(BACKGROUND_COLOR);
+    BasicRenderer renderer = BasicRenderer(bootInfo->framebuffer, bootInfo->font);
+    GlobalRenderer = &renderer;
+    GlobalRenderer->clearScreen(BACKGROUND_COLOR);
 
     uint64_t mMapEntries = bootInfo->mMapSize / bootInfo->mDescriptorSize;
 
@@ -61,12 +67,25 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     asm volatile("mov %0, %%cr3" : : "r"(PML4)); // Pass the PML4 to the CPU
 
-    renderer.printf("Paging initialized!\n");
+    GlobalRenderer->printf("Paging initialized!\n");
 
     GDT_Initialize();
-    renderer.printf("GDT initialized!\n");
+    GlobalRenderer->printf("GDT initialized!\n");
+
+    IDTDescriptor idtr;
+    idtr.Limit = 0x0FFF;
+    idtr.Offset = (uint64_t)GlobalAllocator.RequestPage();
+
+    IDT_SetGate(0x0E, (void*)PageFault_Handler, 0x08, IDT_TA_InterruptGate, idtr);
+
+    asm volatile("lidt %0" : : "m"(idtr));
+
+    GlobalRenderer->printf("IDT initialized!\n");
     
-    renderer.printf("Hello World!\n");
+    GlobalRenderer->printf("Hello World!\n");
+
+    // int* test = (int*)0x80000000000;
+    // *test = 2;
 
     while (1)
     {

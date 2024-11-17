@@ -17,10 +17,13 @@ public:
     void clearScreen(uint32_t color);
 
     void drawChar(uint32_t x, uint32_t y, uint32_t color, char c);
+
+    void setColor(uint32_t color);
     
     void putc(char c);
     void puts(const char* string);
     void printf(const char* fmt, ...);
+
 private:
     Vector2 cursorPos;
 
@@ -31,4 +34,6 @@ private:
     void printf_unsigned(unsigned long long number, int radix);
     void printf_signed(long long number, int radix);
 };
+
+extern BasicRenderer* GlobalRenderer;
 

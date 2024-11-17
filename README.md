@@ -28,6 +28,6 @@ make run # make sure that you have qemu installed
 ```
 
 ## Real hardware
-You can use the dd command to copy from the ISO to the USB drive and then use it to boot on your computer
+You can use the `dd` command to copy from the ISO to the USB drive and then use it to boot on your computer
 
 

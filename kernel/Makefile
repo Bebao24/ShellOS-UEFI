@@ -3,7 +3,7 @@ LD = x86_64-elf-gcc
 
 LDS = kernel.ld
 
-CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -I src -I src/graphics
+CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -I src -I src/graphics -I src/memory
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc -fno-exceptions
 
 SRC_DIR = src

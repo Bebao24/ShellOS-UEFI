@@ -138,6 +138,9 @@ typedef struct
 {
     GOP_Framebuffer_t* framebuffer;
     PSF1_FONT* font;
+    EFI_MEMORY_DESCRIPTOR* mMap;
+    UINTN mMapSize;
+    UINTN mDescriptorSize;
 } BootInfo;
 
 EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
@@ -240,12 +243,27 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
         Print(L"Font found! charSize=%d\r\n", font->fontHeader->charSize);
     }
 
+    EFI_MEMORY_DESCRIPTOR* map = NULL;
+    UINTN mapSize, mapKey;
+    UINTN descriptorSize;
+    UINT32 descriptorVersion;
+    {
+        SystemTable->BootServices->GetMemoryMap(&mapSize, map, &mapKey, &descriptorSize, &descriptorVersion);
+        SystemTable->BootServices->AllocatePool(EfiLoaderData, mapSize, (void**)&map);
+        SystemTable->BootServices->GetMemoryMap(&mapSize, map, &mapKey, &descriptorSize, &descriptorVersion);
+    }
+
     void (*KernelStart)(BootInfo*) = ((__attribute__((sysv_abi)) void (*)(BootInfo*)) header.e_entry);
 
     // Passing boot infomations to the kernel
     BootInfo bootInfo;
     bootInfo.framebuffer = newBuffer;
     bootInfo.font = font;
+    bootInfo.mMap = map;
+    bootInfo.mMapSize = mapSize;
+    bootInfo.mDescriptorSize = descriptorSize;
+
+    SystemTable->BootServices->ExitBootServices(ImageHandle, mapKey);
 
     KernelStart(&bootInfo);
 

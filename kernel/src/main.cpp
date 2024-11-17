@@ -11,6 +11,7 @@
 #include <PageFrameAllocator.h>
 #include <paging/PageTableManager.h>
 #include <memory.h>
+#include <gdt.h>
 
 struct BootInfo
 {
@@ -60,7 +61,10 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     asm volatile("mov %0, %%cr3" : : "r"(PML4)); // Pass the PML4 to the CPU
 
-    renderer.printf("Paging initialize!\n");
+    renderer.printf("Paging initialized!\n");
+
+    GDT_Initialize();
+    renderer.printf("GDT initialized!\n");
     
     renderer.printf("Hello World!\n");
 

@@ -5,9 +5,11 @@ ASM = nasm
 
 LDS = kernel.ld
 
-CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -I src -I src/graphics -I src/memory -I src/libc++ -I src/arch/x86_64 \
-	-I src/arch/x86_64/cpu -I src/arch/x86_64/io
+CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc -fno-exceptions
+
+INCLUDE_PATHS = -I src -I src/graphics -I src/memory -I src/libc++ -I src/arch/x86_64 \
+	-I src/arch/x86_64/cpu -I src/arch/x86_64/io -I src/drivers/input
 
 ASMFLAGS = -f elf64
 
@@ -38,14 +40,13 @@ $(BUILD_DIR)/kernel.bin: $(C_OBJECTS) $(ASM_OBJECTS)
 $(OBJECT_DIR)/arch/x86_64/cpu/interrupts.o: $(SRC_DIR)/arch/x86_64/cpu/interrupts.cpp $(SRC_DIR)/arch/x86_64/cpu/interrupts.h
 	@ echo "Compiling " $<
 	@ mkdir -p $(dir $@)
-	@ $(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding -c $< -o $@ -I src -I src/graphics -I src/memory \
-	 -I src/libc++ -I src/arch/x86_64 \
+	@ $(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding $(INCLUDE_PATHS) -c -o $@ $<
 	-I src/arch/x86_64/cpu -I src/arch/x86_64/io
 
 $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.cpp $(C_HEADERS)
 	@ echo "Compiling" $<
 	@ mkdir -p $(dir $@)
-	@ $(CC) $(CFLAGS) -c -o $@ $<
+	@ $(CC) $(CFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 $(OBJECT_DIR)/%_asm.o: $(SRC_DIR)/%.asm $(ASM_HEADERS)
 	@ echo "Assembly " $<

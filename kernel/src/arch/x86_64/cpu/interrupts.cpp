@@ -2,6 +2,7 @@
 #include <BasicRenderer.h>
 #include <pic.h>
 #include <io.h>
+#include <keyboard/keyboard.h>
 
 #define PANIC_COLOR COLOR(255, 55, 0)
 
@@ -53,8 +54,7 @@ void __attribute__((interrupt)) Keyboard_Handler(interrupt_frame* frame)
 {
     (void)frame;
 
-    uint8_t scancode = x64_inb(0x60);
-    GlobalRenderer->printf("Key pressed");
+    HandleKeyboard();
 
     PIC_SendEOI(1);
 }

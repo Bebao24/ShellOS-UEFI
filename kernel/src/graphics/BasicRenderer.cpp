@@ -80,6 +80,17 @@ void BasicRenderer::putc(char c)
                 putc(' ');
             }
             break;
+        case '\b':
+            if (cursorPos.y > 0 && cursorPos.x <= 0)
+            {
+                cursorPos.x = this->fb->width;
+                cursorPos.y -= 16;
+            }
+
+            cursorPos.x -= 8;
+            drawRect(cursorPos.x, cursorPos.y, 8, 16, BACKGROUND_COLOR);
+
+            break;
         default:
             drawChar(cursorPos.x, cursorPos.y, this->textColor, c);
             cursorPos.x += 8;

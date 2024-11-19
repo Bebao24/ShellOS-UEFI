@@ -1,0 +1,5 @@
+#pragma once
+
+char getKey();
+
+

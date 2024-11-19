@@ -16,6 +16,8 @@
 #include <idt.h>
 #include <interrupts.h>
 #include <pic.h>
+#include <keyboard/keyboard.h>
+#include <input/input.h>
 
 #define PIC_REMAP_OFFSET 0x20
 #define IRQ_OFFSET(offset) (PIC_REMAP_OFFSET + offset)
@@ -94,9 +96,24 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     asm volatile("sti"); // Re-enable interrupt
 
+    InitKeyboard();
+
     GlobalRenderer->printf("IDT initialized!\n");
     
     GlobalRenderer->printf("Hello World!\n");
+
+    while (1)
+    {
+        char key = getKey();
+
+        if (key == '\r')
+        {
+            GlobalRenderer->putc('\n');
+            continue;
+        }
+
+        GlobalRenderer->putc(key);
+    }
 
     while (1)
     {

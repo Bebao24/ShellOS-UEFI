@@ -15,6 +15,10 @@
 
 #include <idt.h>
 #include <interrupts.h>
+#include <pic.h>
+
+#define PIC_REMAP_OFFSET 0x20
+#define IRQ_OFFSET(offset) (PIC_REMAP_OFFSET + offset)
 
 struct BootInfo
 {
@@ -77,15 +81,22 @@ extern "C" void kmain(BootInfo* bootInfo)
     idtr.Offset = (uint64_t)GlobalAllocator.RequestPage();
 
     IDT_SetGate(0x0E, (void*)PageFault_Handler, 0x08, IDT_TA_InterruptGate, idtr);
+    IDT_SetGate(0x08, (void*)DoubleFaults_Handler, 0x08, IDT_TA_InterruptGate, idtr);
+    IDT_SetGate(0xD, (void*)GPFault_Handler, 0x08, IDT_TA_InterruptGate, idtr);
+    IDT_SetGate(0x00, (void*)DividedBy0Fault_Handler, 0x08, IDT_TA_InterruptGate, idtr);
+    
+    IDT_SetGate(IRQ_OFFSET(1), (void*)Keyboard_Handler, 0x08, IDT_TA_InterruptGate, idtr);
 
     asm volatile("lidt %0" : : "m"(idtr));
+
+    PIC_Configure(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8);
+    PIC_Unmask(1);
+
+    asm volatile("sti"); // Re-enable interrupt
 
     GlobalRenderer->printf("IDT initialized!\n");
     
     GlobalRenderer->printf("Hello World!\n");
-
-    // int* test = (int*)0x80000000000;
-    // *test = 2;
 
     while (1)
     {

@@ -6,7 +6,7 @@ ASM = nasm
 LDS = kernel.ld
 
 CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -I src -I src/graphics -I src/memory -I src/libc++ -I src/arch/x86_64 \
-	-I src/arch/x86_64/cpu
+	-I src/arch/x86_64/cpu -I src/arch/x86_64/io
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc -fno-exceptions
 
 ASMFLAGS = -f elf64
@@ -40,7 +40,7 @@ $(OBJECT_DIR)/arch/x86_64/cpu/interrupts.o: $(SRC_DIR)/arch/x86_64/cpu/interrupt
 	@ mkdir -p $(dir $@)
 	@ $(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding -c $< -o $@ -I src -I src/graphics -I src/memory \
 	 -I src/libc++ -I src/arch/x86_64 \
-	-I src/arch/x86_64/cpu
+	-I src/arch/x86_64/cpu -I src/arch/x86_64/io
 
 $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.cpp $(C_HEADERS)
 	@ echo "Compiling" $<

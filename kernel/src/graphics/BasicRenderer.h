@@ -13,6 +13,8 @@ class BasicRenderer
 public:
     BasicRenderer(GOP_Framebuffer_t* framebuffer, PSF1_FONT* font);
     void putPixel(uint32_t x, uint32_t y, uint32_t color);
+    uint32_t getPixel(uint32_t x, uint32_t y);
+
     void drawRect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color);
     void clearScreen(uint32_t color);
 
@@ -24,12 +26,18 @@ public:
     void puts(const char* string);
     void printf(const char* fmt, ...);
 
+    void drawCursor();
+    void hideCursor();
+
 private:
     Vector2 cursorPos;
 
     GOP_Framebuffer_t* fb;
     PSF1_FONT* font;
     uint32_t textColor;
+    uint32_t cursorColor;
+
+    bool CursorDrawn;
 
     void printf_unsigned(unsigned long long number, int radix);
     void printf_signed(long long number, int radix);

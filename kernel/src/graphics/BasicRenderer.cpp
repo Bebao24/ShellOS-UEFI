@@ -2,9 +2,12 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#define CURSOR_WIDTH 8
+#define CURSOR_HEIGHT 16
+
 BasicRenderer* GlobalRenderer;
 
-char cursorBuffer[2][15];
+uint32_t cursorBuffer[CURSOR_WIDTH * CURSOR_HEIGHT];
 Vector2 previousPos;
 
 BasicRenderer::BasicRenderer(GOP_Framebuffer_t* framebuffer, PSF1_FONT* font)
@@ -12,12 +15,19 @@ BasicRenderer::BasicRenderer(GOP_Framebuffer_t* framebuffer, PSF1_FONT* font)
 {
     this->cursorPos = { 0, 0 };
     this->textColor = FOREGROUND_COLOR;
+    this->cursorColor = FOREGROUND_COLOR;
 }
 
 void BasicRenderer::putPixel(uint32_t x, uint32_t y, uint32_t color)
 {
     *(uint32_t*)((uint64_t)fb->BaseAddress + (x * 4) + (y * fb->PixelsPerScanLine * 4)) = color;
 }
+
+uint32_t BasicRenderer::getPixel(uint32_t x, uint32_t y)
+{
+    return *(uint32_t*)((uint64_t)fb->BaseAddress + (x*4) + (y * fb->PixelsPerScanLine * 4));
+}
+
 
 void BasicRenderer::drawRect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color)
 {
@@ -63,8 +73,37 @@ void BasicRenderer::drawChar(uint32_t x, uint32_t y, uint32_t color, char c)
     }
 }
 
+void BasicRenderer::drawCursor()
+{
+    for (uint32_t y = 0; y < CURSOR_HEIGHT; y++)
+    {
+        for (uint32_t x = 0; x < CURSOR_WIDTH; x++)
+        {
+            previousPos = cursorPos;
+            cursorBuffer[x + y * CURSOR_WIDTH] = getPixel(cursorPos.x + x, cursorPos.y + y);
+            putPixel(cursorPos.x + x, cursorPos.y + y, this->cursorColor);
+        }
+    }
+
+    this->CursorDrawn = true;
+}
+
+void BasicRenderer::hideCursor()
+{
+    if (!this->CursorDrawn) return;
+
+    for (uint32_t y = 0; y < CURSOR_HEIGHT; y++)
+    {
+        for (uint32_t x = 0; x < CURSOR_WIDTH; x++)
+        {
+            putPixel(previousPos.x + x, previousPos.y + y, cursorBuffer[x + y * CURSOR_WIDTH]);
+        }
+    }
+}
+
 void BasicRenderer::putc(char c)
 {
+    hideCursor();
     switch (c)
     {
         case '\r':
@@ -110,6 +149,7 @@ void BasicRenderer::putc(char c)
         // Just clear the screen for now
         clearScreen(BACKGROUND_COLOR);
     }
+    drawCursor();
 }
 
 void BasicRenderer::setColor(uint32_t color)

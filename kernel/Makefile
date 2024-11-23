@@ -5,11 +5,11 @@ ASM = nasm
 
 LDS = kernel.ld
 
-CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone
+CFLAGS = -Wall -Wextra -ffreestanding -fshort-wchar -mno-red-zone
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib -lgcc -fno-exceptions
 
 INCLUDE_PATHS = -I src -I src/graphics -I src/memory -I src/libc++ -I src/arch/x86_64 \
-	-I src/arch/x86_64/cpu -I src/arch/x86_64/io -I src/drivers/input
+	-I src/arch/x86_64/cpu -I src/arch/x86_64/io -I src/drivers/ -I src/drivers/input
 
 ASMFLAGS = -f elf64
 

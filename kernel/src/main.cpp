@@ -17,6 +17,7 @@
 #include <interrupts.h>
 #include <pic.h>
 #include <keyboard/keyboard.h>
+#include <disk/ata.h>
 #include <input/input.h>
 
 #define PIC_REMAP_OFFSET 0x20
@@ -97,6 +98,31 @@ extern "C" void kmain(BootInfo* bootInfo)
     asm volatile("sti"); // Re-enable interrupt
 
     InitKeyboard();
+
+    // Initialize ATA
+    ATA_SelectDevice(0); // Select the master device
+
+    // Perform a disk read
+    uint16_t* buffer = (uint16_t*)GlobalAllocator.RequestPage();
+    memset(buffer, 0, 0x1000);
+
+    bool success = ATA_ReadSectors(1, 1, buffer);
+
+    if (success)
+    {
+        GlobalRenderer->printf("Read from disk successfully!\n");
+    }
+    else
+    {
+        GlobalRenderer->printf("Read from disk failed!\n");
+    }
+
+    // Print the output results
+    for (int i = 0; i < 512; i++)
+    {
+        GlobalRenderer->printf("%x", buffer[i]);
+    }
+    GlobalRenderer->putc('\n');
 
     GlobalRenderer->printf("IDT initialized!\n");
     

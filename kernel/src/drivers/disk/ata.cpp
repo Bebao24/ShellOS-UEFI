@@ -76,7 +76,7 @@ bool ATA_ReadSectors(uint32_t lba, uint32_t sectorsCount, void* bufferOut)
     uint16_t cylinder_high = (lba >> 24) & 0xFF;
     uint16_t cylinder_low = (lba >> 16) & 0xFF;
     uint8_t head = (lba >> 8) & 0x0F;
-    uint8_t sector = lba & 0xFF;
+    uint8_t sector = (lba & 0xFF) ? (lba & 0xFF) : 1;
 
     // Output the information
     x64_outb(ATA_PRIMARY_BASE + 2, sectorsCount); // 0x1F2 is the sectors count port

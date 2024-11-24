@@ -106,7 +106,7 @@ extern "C" void kmain(BootInfo* bootInfo)
     uint16_t* buffer = (uint16_t*)GlobalAllocator.RequestPage();
     memset(buffer, 0, 0x1000);
 
-    bool success = ATA_ReadSectors(1, 1, buffer);
+    bool success = ATA_ReadSectors(0, 1, buffer);
 
     if (success)
     {

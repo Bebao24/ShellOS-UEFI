@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <cstring>
 
+PageTableManager g_PageTableManager = NULL;
+
 PageTableManager::PageTableManager(PageTable* PML4)
     :PML4(PML4)
 {

@@ -11,17 +11,21 @@
 #include <PageFrameAllocator.h>
 #include <paging/PageTableManager.h>
 #include <memory.h>
-#include <gdt.h>
+#include <heap.h>
 
+#include <gdt.h>
 #include <idt.h>
 #include <interrupts.h>
 #include <pic.h>
 #include <keyboard/keyboard.h>
-#include <disk/ata.h>
 #include <input/input.h>
+
+#include <disk/ata.h>
 
 #define PIC_REMAP_OFFSET 0x20
 #define IRQ_OFFSET(offset) (PIC_REMAP_OFFSET + offset)
+
+#define HEAP_ADDRESS ((void*)0x0000100000000000)
 
 struct BootInfo
 {
@@ -56,12 +60,12 @@ extern "C" void kmain(BootInfo* bootInfo)
     PageTable* PML4 = (PageTable*)GlobalAllocator.RequestPage();
     memset(PML4, 0, 0x1000);
 
-    PageTableManager pageTableManager(PML4);
+    g_PageTableManager = PageTableManager(PML4);
 
     // Identity mapping the entire system memory
     for (uint64_t i = 0; i < getMemorySize(bootInfo->mMap, mMapEntries, bootInfo->mDescriptorSize); i += 0x1000)
     {
-        pageTableManager.MapMemory((void*)i, (void*)i);
+        g_PageTableManager.MapMemory((void*)i, (void*)i);
     }
 
     // Identity mapping the GOP framebuffer
@@ -69,7 +73,7 @@ extern "C" void kmain(BootInfo* bootInfo)
     uint64_t fbSize = (uint64_t)bootInfo->framebuffer->BufferSize + 0x1000;
     for (uint64_t i = fbBase; i < fbBase + fbSize; i += 0x1000)
     {
-        pageTableManager.MapMemory((void*)i, (void*)i);
+        g_PageTableManager.MapMemory((void*)i, (void*)i);
     }
 
     asm volatile("mov %0, %%cr3" : : "r"(PML4)); // Pass the PML4 to the CPU
@@ -99,33 +103,23 @@ extern "C" void kmain(BootInfo* bootInfo)
 
     InitKeyboard();
 
+    GlobalRenderer->printf("IDT initialized!\n");
+
     // Initialize ATA
     ATA_SelectDevice(0); // Select the master device
 
-    // Perform a disk read
-    uint16_t* buffer = (uint16_t*)GlobalAllocator.RequestPage();
-    memset(buffer, 0, 0x1000);
+    GlobalRenderer->printf("Disk initialized!\n");
 
-    bool success = ATA_ReadSectors(0, 1, buffer);
+    InitializeHeap(HEAP_ADDRESS, 0x10);
 
-    if (success)
-    {
-        GlobalRenderer->printf("Read from disk successfully!\n");
-    }
-    else
-    {
-        GlobalRenderer->printf("Read from disk failed!\n");
-    }
-
-    // Print the output results
-    for (int i = 0; i < 512; i++)
-    {
-        GlobalRenderer->printf("%x", buffer[i]);
-    }
-    GlobalRenderer->putc('\n');
-
-    GlobalRenderer->printf("IDT initialized!\n");
+    GlobalRenderer->printf("Heap initialized!\n");
     
+    // Test malloc()
+    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x8000));
+    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x8000));
+    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x100));
+
+
     GlobalRenderer->printf("Hello World!\n");
 
     while (1)

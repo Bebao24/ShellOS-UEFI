@@ -10,3 +10,4 @@ public:
     PageTable* PML4;
 };
 
+extern PageTableManager g_PageTableManager;

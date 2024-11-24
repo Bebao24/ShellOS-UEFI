@@ -67,6 +67,14 @@ void* malloc(size_t size)
     return malloc(size); // Recursively call malloc()
 }
 
+void free(void* address)
+{
+    HeapSegHeader* segment = (HeapSegHeader*)address - 1;
+    segment->free = true;
+    segment->CombineForward();
+    segment->CombineBackward();
+}
+
 void ExpandHeap(size_t size)
 {
     // Road up to a multiple of 0x1000 (4096)

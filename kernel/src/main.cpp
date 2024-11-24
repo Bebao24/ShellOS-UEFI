@@ -115,8 +115,10 @@ extern "C" void kmain(BootInfo* bootInfo)
     GlobalRenderer->printf("Heap initialized!\n");
     
     // Test malloc()
-    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x8000));
-    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x8000));
+    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x100));
+    void* address = malloc(0x100);
+    GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)address);
+    free(address);
     GlobalRenderer->printf("malloc address: 0x%llx\n", (uint64_t)malloc(0x100));
 
 
